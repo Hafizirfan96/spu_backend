@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model District {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+  applicants Applicant[]
+  experiences Experience[]
+}
+
+model Applicant {
+  id               Int              @id @default(autoincrement())
+  fullName         String           @map("full_name") @db.VarChar(255)
+  fatherName       String?          @map("father_name") @db.VarChar(255)
+  cnic             String           @db.VarChar(255)
+  email            String           @db.VarChar(255)
+  username         String           @db.VarChar(255)
+  password         String           @db.VarChar(255)
+  cellNo           String?          @map("cell_no") @db.VarChar(255)
+  dob              DateTime?        @db.Date
+  gender           Gender?
+  postId           Int?             @map("post_id")
+  post             Post?            @relation(fields: [postId], references: [id])
+  urlProfilePic    String?          @map("url_profile_pic") @db.VarChar(500)
+  urlCv            String?          @map("url_cv") @db.VarChar(500)
+  urlCnic          String?          @map("url_cnic") @db.VarChar(500)
+  urlAcademicCerts String?          @map("url_academic_certificates") @db.VarChar(500)
+  urlExperienceCerts String?        @map("url_experience_certificates") @db.VarChar(500)
+  districtId       Int?             @map("district_id")
+  district         District?        @relation(fields: [districtId], references: [id])
+  otherDistrict    String?          @map("other_district") @db.VarChar(255)
+  address          String?          @db.VarChar(500)
+  status           Status?
+  submissionStatus SubmissionStatus @default(NOT_SUBMITTED) @map("submission_status")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  qualifications   Qualification[]
+  experiences      Experience[]
+}
+
+enum Status {
+  UNDER_REVIEW          @map("Under Review")
+  INTERVIEW_CALL_SENT   @map("Interview call sent")
+  INTERVIES_REVIEW      @map("Intervies Review")
+  SELECTED_OFFER_SENT   @map("Selected (Offer letter sent)")
+}
+
+enum SubmissionStatus {
+  NOT_SUBMITTED @map("not submitted")
+  SUBMITTED     @map("submitted")
+}
+
+enum Gender {
+  MALE   @map("male")
+  FEMALE @map("female")
+}
+
+model Qualification {
+  id                Int             @id @default(autoincrement())
+  applicantId       Int             @map("applicant_id")
+  applicant         Applicant       @relation(fields: [applicantId], references: [id])
+  degreeType        DegreeType      @map("degree_type")
+  degreeTypeOther   String?         @map("degree_type_other") @db.VarChar(255)
+  fieldOfStudy      FieldOfStudy    @map("field_of_study")
+  fieldOfStudyOther String?         @map("field_of_study_other") @db.VarChar(255)
+  institutionName   String          @map("institution_name") @db.VarChar(255)
+  institutionCountry Country        @map("institution_country")
+  institutionCountryOther String?   @map("institution_country_other") @db.VarChar(255)
+  graduationYear    Int             @map("graduation_year")
+  grade             String          @db.VarChar(255)
+  durationMonths    Int             @map("duration_months")
+  isForeign         Boolean         @map("is_foreign")
+  notes             String?         @db.Text
+  documentUrl       String?         @map("document_url") @db.VarChar(500)
+}
+
+enum DegreeType {
+  MATRIC         @map("matric")
+  INTERMEDIATE   @map("intermediate")
+  BACHELOR       @map("bachelor")
+  MASTER         @map("master")
+  MPHIL          @map("mphil")
+  PHD            @map("phd")
+  DIPLOMA        @map("diploma")
+  CERTIFICATION  @map("certification")
+  OTHER          @map("other")
+}
+
+enum FieldOfStudy {
+  PUBLIC_ADMINISTRATION @map("public administration")
+  BUSINESS_ADMINISTRATION @map("business administration")
+  ECONOMICS            @map("economics")
+  ACCOUNTING_FINANCE   @map("accounting and finance")
+  LAW                  @map("law")
+  MANAGEMENT           @map("management")
+  HUMAN_RESOURCES      @map("human resources")
+  INFORMATION_TECHNOLOGY @map("information technology")
+  COMPUTER_SCIENCE     @map("computer science")
+  DATA_SCIENCE         @map("data science")
+  STATISTICS           @map("statistics")
+  ENGINEERING          @map("engineering")
+  SOCIAL_SCIENCES      @map("social sciences")
+  PUBLIC_POLICY        @map("public policy")
+  INTERNATIONAL_RELATIONS @map("international relations")
+  OTHER                @map("other")
+}
+
+model Experience {
+  id               Int               @id @default(autoincrement())
+  applicantId      Int               @map("applicant_id")
+  applicant        Applicant         @relation(fields: [applicantId], references: [id])
+  organizationName String            @map("organization_name") @db.VarChar(255)
+  organizationType OrganizationType  @map("organization_type")
+  department       String            @db.VarChar(255)
+  designation      String            @db.VarChar(255)
+  grade            String            @db.VarChar(255)
+  startDate        DateTime          @map("start_date") @db.Date
+  endDate          DateTime?         @map("end_date") @db.Date
+  isCurrent        Boolean           @map("is_current")
+  dutiesSummary    String?           @map("duties_summary") @db.Text
+  achievements     String?           @db.Text
+  districtId       Int               @map("district_id")
+  district         District          @relation(fields: [districtId], references: [id])
+  country          Country
+  countryOther     String?           @map("country_other") @db.VarChar(255)
+  documentUrl      String?           @map("document_url") @db.VarChar(500)
+}
+
+enum OrganizationType {
+  GOVERNMENT       @map("government")
+  SEMI_GOVERNMENT  @map("semi-government")
+  PRIVATE          @map("private")
+  INTERNATIONAL    @map("international")
+  NGO              @map("ngo")
+  OTHER            @map("other")
+}
+
+model Post {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(255)
+  ageLimit    Int?           
+  description String?      @db.Text
+  applicants  Applicant[]
+}
+
+enum Country {
+  PAKISTAN    @map("Pakistan")
+  INDIA       @map("India")
+  CHINA       @map("China")
+  UNITED_STATES @map("United States")
+  UNITED_KINGDOM @map("United Kingdom")
+  CANADA      @map("Canada")
+  AUSTRALIA   @map("Australia")
+  SAUDI_ARABIA @map("Saudi Arabia")
+  UAE         @map("United Arab Emirates")
+  OTHER       @map("Other")
+}
