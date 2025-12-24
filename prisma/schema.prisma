@@ -20,13 +20,13 @@ model Applicant {
   fatherName       String?          @map("father_name") @db.VarChar(255)
   cnic             String           @db.VarChar(255)
   email            String           @db.VarChar(255)
-  username         String           @db.VarChar(255)
+  username         String           @unique @db.VarChar(255)
   password         String           @db.VarChar(255)
   cellNo           String?          @map("cell_no") @db.VarChar(255)
   dob              DateTime?        @db.Date
   gender           Gender?
-  postId           Int?             @map("post_id")
-  post             Post?            @relation(fields: [postId], references: [id])
+  postId           Int             @map("post_id")
+  post             Post            @relation(fields: [postId], references: [id])
   urlProfilePic    String?          @map("url_profile_pic") @db.VarChar(500)
   urlCv            String?          @map("url_cv") @db.VarChar(500)
   urlCnic          String?          @map("url_cnic") @db.VarChar(500)
@@ -42,6 +42,7 @@ model Applicant {
   updatedAt        DateTime         @updatedAt @map("updated_at")
   qualifications   Qualification[]
   experiences      Experience[]
+  @@unique([cnic, postId])
 }
 
 enum Status {
