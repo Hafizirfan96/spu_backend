@@ -260,96 +260,89 @@ app.post("/auth/signup", async (req, res) => {
     res.status(500).json({ error: "Unable to signup", detail: error.message });
   }
 });
+
 // app.post("/auth/username", async (req, res) => {
 //   try {
-//     const { cnic, username,postId } = req.body || {};
+//     const { cnic, username, postId } = req.body || {};
 
 //     if (!cnic || !username || !postId) {
-//       return res.status(400).json({ error: "Missing required fields" });
+//       return res.status(400).json({
+//         error: "Missing required fields",
+//       });
 //     }
 
-//     // Check if email or username already exists
 //     const existing = await prisma.applicant.findFirst({
-//       where: { username: username },
+//       where: { username },
 //     });
+
 //     if (existing) {
-//       return res.status(409).json({ error: "Username already exists " });
+//       return res.status(409).json({
+//         error: "Username already exists",
+//       });
 //     }
 
-//     // **Check if combination of postId and CNIC already exists**
 //     const duplicatePostCnic = await prisma.applicant.findFirst({
 //       where: {
 //         postId: Number(postId),
 //         cnic,
 //       },
 //     });
-//     console.log("duplicatePostCnic---",duplicatePostCnic)
+
 //     if (duplicatePostCnic) {
-//       return res
-//         .status(408)
-//         .json({
-//           error:
-//             "An application with the same Post name and CNIC already exists" });
+//       return res.status(408).json({
+//         error: "An application with the same Post and CNIC already exists",
+//       });
 //     }
 
-
-//     // Sign token
-//     const token = signToken({
-//       sub: applicant.id,
-//       email: applicant.email,
-//       username: applicant.username,
+//     return res.status(200).json({
+//       message: "Username and CNIC are valid",
 //     });
-//     res.json({ token, applicant });
+
 //   } catch (error) {
-//     console.error("Signup error", error);
-//     res.status(500).json({ error: "Unable to signup", detail: error.message });
+//     console.error("Validation error:", error);
+//     return res.status(500).json({
+//       error: "Server error during validation",
+//     });
 //   }
 // });
-
-// Login: check credentials and return token
-
 app.post("/auth/username", async (req, res) => {
   try {
     const { cnic, username, postId } = req.body || {};
 
     if (!cnic || !username || !postId) {
-      return res.status(400).json({
-        error: "Missing required fields",
-      });
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const existing = await prisma.applicant.findFirst({
+    const existingUsername = await prisma.applicant.findFirst({
       where: { username },
     });
 
-    if (existing) {
+    if (existingUsername) {
       return res.status(409).json({
         error: "Username already exists",
+        code: "USERNAME_EXISTS",
       });
     }
 
-    const duplicatePostCnic = await prisma.applicant.findFirst({
+    const duplicate = await prisma.applicant.findFirst({
       where: {
-        postId: Number(postId),
         cnic,
+        postId: Number(postId),
       },
     });
 
-    if (duplicatePostCnic) {
-      return res.status(408).json({
+    if (duplicate) {
+      return res.status(409).json({
         error: "An application with the same Post and CNIC already exists",
+        code: "DUPLICATE_CNIC_POST",
       });
     }
 
-    return res.status(200).json({
-      message: "Username and CNIC are valid",
-    });
+    return res.status(200).json({ message: "Valid" });
 
   } catch (error) {
     console.error("Validation error:", error);
-    return res.status(500).json({
-      error: "Server error during validation",
-    });
+    return res.status(500).json({ error: "Server error during validation" });
   }
 });
 
